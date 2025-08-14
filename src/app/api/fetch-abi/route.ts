@@ -7,6 +7,8 @@ const ETHERSCAN_BASE_SEPOLIA_API_KEY =
   process.env.NEXT_PUBLIC_ETHERSCAN_BASE_SEPOLIA_API_KEY;
 const ETHERSCAN_ARBITRUM_SEPOLIA_API_KEY =
   process.env.NEXT_PUBLIC_ETHERSCAN_ARBITRUM_SEPOLIA_API_KEY;
+const ETHERSCAN_ARBITRUM_API_KEY =
+  process.env.NEXT_PUBLIC_ETHERSCAN_ARBITRUM_API_KEY;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -18,6 +20,7 @@ export async function GET(req: NextRequest) {
   const chainIdNum = chainId ? Number(chainId) : undefined;
   const isBaseSepolia = chainIdNum === 84532 || chainIdNum === 8453;
   const isArbitrumSepolia = chainIdNum === 421614;
+  const isArbitrum = chainIdNum === 42161;
 
   // 1. Try Blockscout
   let blockscoutUrl = "";
@@ -27,6 +30,9 @@ export async function GET(req: NextRequest) {
   } else if (isArbitrumSepolia) {
     blockscoutUrl = `https://sepolia.arbiscan.io/api?module=contract&action=getabi&address=${address}`;
     devLog("arbitrum", blockscoutUrl);
+  } else if (isArbitrum) {
+    blockscoutUrl = `https://arbiscan.io/api?module=contract&action=getabi&address=${address}`;
+    devLog("arbitrum mainnet", blockscoutUrl);
   } else {
     blockscoutUrl = `https://optimism-sepolia.blockscout.com/api?module=contract&action=getabi&address=${address}`;
     devLog("op", blockscoutUrl);
@@ -55,6 +61,9 @@ export async function GET(req: NextRequest) {
   } else if (isArbitrumSepolia && ETHERSCAN_ARBITRUM_SEPOLIA_API_KEY) {
     etherscanUrl = `https://api.etherscan.io/v2/api?chainid=421614&module=contract&action=getabi&address=${address}&apikey=${ETHERSCAN_ARBITRUM_SEPOLIA_API_KEY}`;
     devLog("arbitrum", etherscanUrl);
+  } else if (isArbitrum && ETHERSCAN_ARBITRUM_API_KEY) {
+    etherscanUrl = `https://api.arbiscan.io/api?module=contract&action=getabi&address=${address}&apikey=${ETHERSCAN_ARBITRUM_API_KEY}`;
+    devLog("arbitrum mainnet", etherscanUrl);
   } else if (ETHERSCAN_OPTIMISM_SEPOLIA_API_KEY) {
     etherscanUrl = `https://api-sepolia-optimism.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${ETHERSCAN_OPTIMISM_SEPOLIA_API_KEY}`;
     devLog("op", etherscanUrl);

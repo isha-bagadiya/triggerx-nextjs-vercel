@@ -29,28 +29,40 @@ export const TGBalanceProvider: React.FC<{
   const chainId = useChainId();
 
   // Function to get RPC URL based on chain ID
-  const getRpcUrl = useCallback((chainId: number): string => {
+  const getRpcUrl = useCallback((chainId: number): string | undefined => {
     const isBaseSepolia = chainId === 84532 || chainId === 8453;
     const isArbitrumSepolia = chainId === 421614;
+    const isArbitrum = chainId === 42161;
     if (isBaseSepolia) {
       if (!process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL) {
-        throw new Error(
-          "NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL environment variable is not set",
+        console.warn(
+          "Missing NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL; skipping balance fetch",
         );
+        return undefined;
       }
       return process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL;
     } else if (isArbitrumSepolia) {
       if (!process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC_URL) {
-        throw new Error(
-          "NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC_URL environment variable is not set",
+        console.warn(
+          "Missing NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC_URL; skipping balance fetch",
         );
+        return undefined;
       }
       return process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC_URL;
+    } else if (isArbitrum) {
+      if (!process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL) {
+        console.warn(
+          "Missing NEXT_PUBLIC_ARBITRUM_RPC_URL; skipping balance fetch",
+        );
+        return undefined;
+      }
+      return process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL;
     } else {
       if (!process.env.NEXT_PUBLIC_OPTIMISM_SEPOLIA_RPC_URL) {
-        throw new Error(
-          "NEXT_PUBLIC_OPTIMISM_SEPOLIA_RPC_URL environment variable is not set",
+        console.warn(
+          "Missing NEXT_PUBLIC_OPTIMISM_SEPOLIA_RPC_URL; skipping balance fetch",
         );
+        return undefined;
       }
       return process.env.NEXT_PUBLIC_OPTIMISM_SEPOLIA_RPC_URL;
     }
@@ -89,6 +101,9 @@ export const TGBalanceProvider: React.FC<{
         const network = await browserProvider.getNetwork();
         const chainId = Number(network.chainId);
         const rpcUrl = getRpcUrl(chainId);
+        if (!rpcUrl) {
+          return; // Skip if no RPC URL configured for this chain
+        }
 
         devLog("[TGBalance] Using RPC URL:", rpcUrl);
 

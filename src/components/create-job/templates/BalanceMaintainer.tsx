@@ -507,9 +507,13 @@ const BalanceMaintainer = () => {
                 href={`${
                   chainId === BigInt(11155420)
                     ? "https://sepolia-optimism.etherscan.io/address/"
-                    : chainId === BigInt(421614)
-                      ? "https://sepolia.arbiscan.io/address/"
-                      : "https://sepolia.basescan.org/address/"
+                    : chainId === BigInt(84532)
+                      ? "https://sepolia.basescan.org/address/"
+                      : chainId === BigInt(421614)
+                        ? "https://sepolia.arbiscan.io/address/"
+                        : chainId === BigInt(42161)
+                          ? "https://arbiscan.io/address/"
+                          : "https://sepolia-optimism.etherscan.io/address/"
                 }${contractAddress}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -616,9 +620,11 @@ const BalanceMaintainer = () => {
 
       {isConnected && !isDeployed && (
         <div className="flex flex-wrap gap-3 sm:gap-4">
-          {!hasSufficientBalance && !isCheckingBalance && (
-            <ClaimEth onClaimSuccess={handleClaimSuccess} />
-          )}
+          {!hasSufficientBalance &&
+            !isCheckingBalance &&
+            chainId !== BigInt(42161) && (
+              <ClaimEth onClaimSuccess={handleClaimSuccess} />
+            )}
 
           {isCheckingBalance && (
             <div className="flex items-center gap-2 px-4 py-2 bg-[#FFFFFF] rounded-full">
@@ -638,7 +644,11 @@ const BalanceMaintainer = () => {
         <Banner>You need to deploy contract before create the job.</Banner>
       )}
       {isConnected && !isDeployed && !hasSufficientBalance && (
-        <Banner>You need to claim ETH before create the job.</Banner>
+        <Banner>
+          {chainId === BigInt(42161)
+            ? "Insufficient ETH balance on Arbitrum Mainnet. Please top up your wallet to continue."
+            : "You need to claim ETH before create the job."}
+        </Banner>
       )}
 
       <TransactionModal

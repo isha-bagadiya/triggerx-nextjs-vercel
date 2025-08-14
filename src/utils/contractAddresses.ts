@@ -23,6 +23,16 @@ export const CONTRACT_ADDRESSES = {
       process.env.NEXT_PUBLIC_ARBITRUM_JOB_CREATION_CONTRACT_ADDRESS || "",
     // Add other contract addresses for Arbitrum Sepolia here
   },
+  // Arbitrum (chainId: 42161)
+  42161: {
+    TRIGGER_GAS_REGISTRY_ADDRESS:
+      process.env.NEXT_PUBLIC_ARBITRUM_MAINNET_TRIGGER_GAS_REGISTRY_ADDRESS ||
+      "",
+    JOB_REGISTRY_ADDRESS:
+      process.env.NEXT_PUBLIC_ARBITRUM_MAINNET_JOB_CREATION_CONTRACT_ADDRESS ||
+      "",
+    // Add other contract addresses for Arbitrum mainnet here
+  },
 } as const;
 
 export type SupportedChainId = keyof typeof CONTRACT_ADDRESSES;

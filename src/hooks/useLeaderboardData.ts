@@ -43,7 +43,6 @@ export default function useLeaderboardData(
 
         if (activeTab === "keeper") {
           apiUrl = `${API_BASE_URL}/api/leaderboard/keepers`;
-          devLog("Calling URL:", apiUrl);
         } else if (activeTab === "developer" || activeTab === "contributor") {
           apiUrl = `${API_BASE_URL}/api/leaderboard/users`;
         }
@@ -55,8 +54,10 @@ export default function useLeaderboardData(
         });
         devLog("[Leaderboard] Response status:", response.status);
         if (!response.ok) throw new Error("Failed to fetch leaderboard data");
+
         const data = await response.json();
         devLog("[Leaderboard] Raw API response:", data);
+
         if (activeTab === "keeper") {
           const transformedKeeperData: KeeperData[] = Array.isArray(data)
             ? data.map((keeper) => ({
@@ -98,7 +99,8 @@ export default function useLeaderboardData(
             developers: transformedUserData,
           }));
         }
-        setIsLoading(true);
+
+        setIsLoading(false);
       } catch (err) {
         if (err instanceof Error) {
           setError("Something went wrong.");
