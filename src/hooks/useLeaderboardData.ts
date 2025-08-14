@@ -33,7 +33,6 @@ export default function useLeaderboardData(
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      setError(null);
       try {
         let apiUrl = "";
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -46,6 +45,7 @@ export default function useLeaderboardData(
         } else if (activeTab === "developer" || activeTab === "contributor") {
           apiUrl = `${API_BASE_URL}/api/leaderboard/users`;
         }
+
         devLog(`[Leaderboard] Fetching for tab: ${activeTab}, URL:`, apiUrl);
         const response = await fetch(apiUrl, {
           headers: {

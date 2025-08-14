@@ -14,6 +14,7 @@ import { useChainId, useSwitchChain } from "wagmi";
 import Modal from "../ui/Modal";
 import { Button } from "../ui/Button";
 import JobCardSkeleton from "../skeleton/JobCardSkeleton";
+import { LucideCopyButton } from "../ui/CopyButton";
 
 export type JobType = {
   id: number;
@@ -169,21 +170,25 @@ const JobCard: React.FC<JobCardProps> = ({
   return (
     <Card
       expanded={expanded}
-      className={`!p-0 ${
+      className={`!p-0 group ${
         expandedDetails ? "h-auto border border-white " : " md:h-[310px] "
       } ${
         expanded
           ? "bg-gradient-to-r from-[#D9D9D924] to-[#14131324] border border-white hover:border-b hover:border-white"
           : isLogOpen
             ? "bg-gradient-to-r from-[#D9D9D924] to-[#14131324] border border-white hover:border-b hover:border-white"
-            : "border-[#2A2A2A] hover:border-[#3A3A3A]"
-      } hover:transform hover:scale-[1.02] transition-transform duration-300 ease ${className}`}
+            : "border-[#2A2A2A] hover:bg-gradient-to-r hover:from-[#D9D9D924] hover:to-[#14131324] hover:border hover:border-white"
+      } transition-all duration-300 ease ${className}`}
       onClick={onClick}
       style={{ cursor: onClick ? "pointer" : undefined }}
     >
       <div>
         <div
-          className={`flex items-center mb-4 p-3 relative ${expanded || isLogOpen ? "border-b border-white " : "border-[#2A2A2A] border-b "}`}
+          className={`flex items-center mb-4 p-3 relative ${
+            expanded || isLogOpen
+              ? "border-b border-white "
+              : "border-[#2A2A2A] border-b group-hover:border-white"
+          }`}
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <Tooltip>
@@ -233,7 +238,6 @@ const JobCard: React.FC<JobCardProps> = ({
             ) : (
               <div style={{ width: 32, height: 32 }}></div>
             )}
-            {/* Network Icon right after linked jobs button */}
             {(() => {
               const network = networksData.supportedNetworks.find(
                 (n) => Number(job.targetChainId) === n.id,
@@ -241,34 +245,37 @@ const JobCard: React.FC<JobCardProps> = ({
               const icon = network
                 ? networksData.networkIcons[network.name]
                 : null;
+              const bgClass = getNetworkBgClass(network?.id);
+
               return icon ? (
-                <svg
-                  viewBox={icon.viewBox}
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6 rounded-full"
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center p-1 ${bgClass}`}
                 >
-                  {icon.paths ? (
-                    // Handle multiple paths (like Arbitrum)
-                    icon.paths.map((path: string, index: number) => (
+                  <svg
+                    viewBox={icon.viewBox}
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                  >
+                    {icon.paths ? (
+                      icon.paths.map((path: string, index: number) => (
+                        <path
+                          key={index}
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d={path}
+                          fill="currentColor" // Will be white due to text-white class
+                        />
+                      ))
+                    ) : (
                       <path
-                        key={index}
                         fillRule="evenodd"
                         clipRule="evenodd"
-                        d={path}
+                        d={icon.path}
                         fill="currentColor"
                       />
-                    ))
-                  ) : (
-                    // Handle single path
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d={icon.path}
-                      fill="currentColor"
-                    />
-                  )}
-                </svg>
+                    )}
+                  </svg>
+                </div>
               ) : null;
             })()}
           </div>
@@ -338,19 +345,17 @@ const JobCard: React.FC<JobCardProps> = ({
                 <Typography variant="body" color="white" align="left">
                   Target Contract :
                 </Typography>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Typography
-                      variant="body"
-                      color="gray"
-                      align="right"
-                      className="max-w-[160px] truncate block"
-                    >
-                      {sliceAddress(job.targetContractAddress)}
-                    </Typography>
-                  </TooltipTrigger>
-                  <TooltipContent>{job.targetContractAddress}</TooltipContent>
-                </Tooltip>
+                <div className="flex text-center">
+                  <Typography
+                    variant="body"
+                    color="gray"
+                    align="right"
+                    className="max-w-[160px] truncate block"
+                  >
+                    {sliceAddress(job.targetContractAddress)}
+                  </Typography>
+                  <LucideCopyButton text={job.targetContractAddress} />
+                </div>
               </div>
               <div className="flex items-start justify-between flex-col sm:flex-row md:items-center gap-2 py-1">
                 <Typography variant="body" color="white" align="left">
@@ -474,7 +479,11 @@ const JobCard: React.FC<JobCardProps> = ({
           )}
         </div>
         <div
-          className={`flex justify-end gap-2 mt-4 p-3 ${expanded || isLogOpen ? "border-t border-white " : "border-[#2A2A2A] border-t hover:border-[#3A3A3A]"}`}
+          className={`flex justify-end gap-2 mt-4 p-3  border-t group-hover:border-white ${
+            expanded || isLogOpen
+              ? "border-t border-white "
+              : "border-[#2A2A2A]"
+          }`}
         >
           <Tooltip>
             <TooltipTrigger asChild>
@@ -586,3 +595,12 @@ const JobCard: React.FC<JobCardProps> = ({
 };
 
 export default React.memo(JobCard);
+
+const getNetworkBgClass = (networkId: number | undefined): string => {
+  const networkBgClasses: Record<number, string> = {
+    84532: "bg-blue-600 text-white", // Base
+    11155420: "bg-red-500 text-white", // Optimism
+    421614: "bg-slate-700 text-white", // Arbitrum
+  };
+  return networkBgClasses[networkId || 0] || "";
+};
